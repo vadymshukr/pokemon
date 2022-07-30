@@ -1,7 +1,7 @@
 import { createContext, FC, ReactNode } from 'react'
 import { PokemonContainerType } from '../composition-root'
 
-export const PokemonContext = createContext<PokemonContainerType | null>(null)
+export const PokemonContext = createContext<PokemonContainerType>({} as PokemonContainerType)
 
 type Props = {
   children: ReactNode

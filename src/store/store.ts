@@ -4,7 +4,7 @@ import thunk, { ThunkDispatch } from 'redux-thunk'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 export const rootReducer = combineReducers({
-  pokemonsReducer: pokemonsReducer
+  pokemons: pokemonsReducer
 })
 
 export const store = createStore(rootReducer, applyMiddleware(thunk))

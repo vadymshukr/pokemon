@@ -1,37 +1,32 @@
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
+import { FilterView } from './filter-view'
+import { useAppDispatch, useAppSelector } from '../../../../store/store'
+import { PokemonContext } from '../../../../pokemon-context/pokemon-context'
 
-type Props = {
-  types: string[]
-  onChange: (type: string) => void
-  currentType: string
-}
-
-export const Filter = ({ types, onChange, currentType }: Props) => {
-  const handleChange = (type: string) => {
-    onChange(type)
+export const Filter = () => {
+  const [currentType, setCurrentType] = useState('')
+  const { selectors, asyncActions, actions } = useContext(PokemonContext)
+  const { loadPokemons, getPokemonsByType } = asyncActions
+  const { resetPokemons } = actions
+  const { types } = useAppSelector(selectors.getPokemonState)
+  const dispatch = useAppDispatch()
+  const onFilterReset = () => {
+    setCurrentType('')
+    dispatch(resetPokemons())
+    dispatch(loadPokemons(0))
   }
-  useEffect(() => {
-    console.log(currentType)
-  }, [currentType])
+
+  const onTypeChange = (type: string) => {
+    dispatch(getPokemonsByType(type))
+    setCurrentType(type)
+  }
+
   return (
-    <FormControl sx={{ width: '400px' }}>
-      <InputLabel>Type</InputLabel>
-      <Select
-        value={currentType}
-        label='Type'
-        onChange={(e) => {
-          handleChange(e.target.value)
-        }}
-      >
-        {types.map((type) => {
-          return (
-            <MenuItem value={type} key={type}>
-              {type}
-            </MenuItem>
-          )
-        })}
-      </Select>
-    </FormControl>
+    <FilterView
+      types={types}
+      onChange={onTypeChange}
+      currentType={currentType}
+      onReset={onFilterReset}
+    />
   )
 }

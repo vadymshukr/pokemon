@@ -1,5 +1,5 @@
 import { HTTPGet, IHTTPService } from '../http-service/http-axios-service'
-import { Pokemon } from '../types/types'
+import { Pokemon, PokemonType, Type } from '../types/types'
 
 export interface NamedAPIResource {
   name: string
@@ -24,6 +24,7 @@ interface IPokemonApi {
   getAllPokemons: ({ offset, limit }: PokemonParams) => Promise<NamedAPIResourceList>
   getPokemonByName: (name: string) => Promise<Pokemon>
   getTypes: () => Promise<NamedAPIResourceList>
+  getPokemonsByType: (type: string) => Promise<Type>
 }
 
 export class PokemonApiService implements IPokemonApi {
@@ -43,5 +44,9 @@ export class PokemonApiService implements IPokemonApi {
 
   getTypes() {
     return this.get<NamedAPIResourceList>('type')
+  }
+
+  getPokemonsByType(type: string) {
+    return this.get<Type>(`type/${type}`)
   }
 }

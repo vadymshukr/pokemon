@@ -1,4 +1,4 @@
-import { Pokemon } from '../types/types'
+import { NamedAPIResource, Pokemon } from '../types/types'
 
 export enum allPokemonsActionEnum {
   getInitialPokemonsList = 'getInitialPokemonsList',
@@ -7,7 +7,8 @@ export enum allPokemonsActionEnum {
   resetPokemons = 'resetPokemons',
   setIsNextPage = 'setIsNextPage',
   setTypes = 'setTypes',
-  filterByType = 'filterByType'
+  filterByType = 'filterByType',
+  singlePokemon = 'singlePokemon'
 }
 
 export type AllPokemonsReducerAction = {
@@ -17,36 +18,26 @@ export type AllPokemonsReducerAction = {
 
 export type State = {
   count: number
-  isNext: boolean
-  pokemons: Pokemon[]
+  isNextPage: boolean
+  pokemons: NamedAPIResource[]
   offset: number
   types: string[]
-  filteredPokemons: Pokemon[]
+  singlePokemon: Pokemon
 }
 
 const initialState: State = {
   count: 0,
-  isNext: false,
+  isNextPage: false,
   pokemons: [],
   offset: 0,
   types: [],
-  filteredPokemons: []
-}
-
-const filterPokemonByType = (pokemons: Pokemon[], payload: string) => {
-  return pokemons.filter((pokemon) => {
-    return (
-      pokemon.types.filter((type) => {
-        return type.type.name === payload
-      }).length > 0
-    )
-  })
+  singlePokemon: {} as Pokemon
 }
 
 export const pokemonsReducer = (state = initialState, action: AllPokemonsReducerAction): State => {
   switch (action.type) {
     case allPokemonsActionEnum.getInitialPokemonsList:
-      return { ...state, pokemons: [...state.pokemons, action.payload] }
+      return { ...state, pokemons: [...state.pokemons, ...action.payload] }
     case allPokemonsActionEnum.nextPage:
       return { ...state, offset: state.offset + 10 }
     case allPokemonsActionEnum.searchPokemon:
@@ -54,11 +45,13 @@ export const pokemonsReducer = (state = initialState, action: AllPokemonsReducer
     case allPokemonsActionEnum.resetPokemons:
       return { ...state, pokemons: [], offset: 0 }
     case allPokemonsActionEnum.setIsNextPage:
-      return { ...state, isNext: action.payload }
+      return { ...state, isNextPage: action.payload }
     case allPokemonsActionEnum.setTypes:
       return { ...state, types: action.payload }
     case allPokemonsActionEnum.filterByType:
-      return { ...state, filteredPokemons: filterPokemonByType(state.pokemons, action.payload) }
+      return { ...state, pokemons: action.payload }
+    case allPokemonsActionEnum.singlePokemon:
+      return { ...state, singlePokemon: action.payload }
     default:
       return state
   }

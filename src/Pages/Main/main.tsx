@@ -6,37 +6,29 @@ import { Searchbar } from './components/searchbar/searchbar'
 import { SorryMsg } from './components/sorry-msg/sorry-msg'
 import { Box } from '@mui/material'
 import { Filter } from './components/filter/filter'
-import { Pokemon } from '../../types/types'
+import Modal from 'react-modal'
+import { PokemonModal } from './components/pokemon-modal/pokemon-modal'
+
+Modal.setAppElement('#root')
 
 export const Main = () => {
+  const [isModalOpen, setModalOpen] = useState(false)
   const dispatch = useAppDispatch()
-  const context = useContext(PokemonContext)
-  const { pokemons, offset, types, filteredPokemons } = useAppSelector(
-    context!.selectors.getPokemonState
-  )
-  const { loadPokemons, searchPokemon, getPokemonTypes } = context!.asyncActions
-  const { nextOffset, resetPokemons, filterByType } = context!.actions
-  const [showedPokemons, setShowedPokemons] = useState<Pokemon[]>([])
-  const [isFilterView, setFilterView] = useState(false)
-  const [currentType, setCurrentType] = useState('')
+  const { selectors, actions, asyncActions } = useContext(PokemonContext)
+  const { pokemons, offset, isNextPage, singlePokemon } = useAppSelector(selectors.getPokemonState)
+  const { loadPokemons, searchPokemon, getPokemonTypes, getSinglePokemon } = asyncActions
+  const { nextOffset, resetPokemons } = actions
   const [searchQuery, setSearchQuery] = useState('')
+
   useEffect(() => {
     dispatch(loadPokemons(offset))
   }, [offset])
 
   useEffect(() => {
-    setShowedPokemons(isFilterView ? filteredPokemons : pokemons)
-  }, [pokemons, isFilterView, currentType, filteredPokemons])
-
-  useEffect(() => {
     dispatch(getPokemonTypes())
   }, [])
 
-  const loadMore = () => {
-    dispatch(nextOffset())
-  }
   const onSearch = () => {
-    setFilterView(false)
     if (searchQuery) {
       dispatch(searchPokemon(searchQuery.toLowerCase()))
     } else {
@@ -47,15 +39,20 @@ export const Main = () => {
     }
   }
 
-  const onTypeChange = (type: string) => {
-    dispatch(filterByType(type))
-    setCurrentType(currentType)
-    setFilterView(true)
-  }
-
   const onSearchReset = () => {
     setSearchQuery('')
-    setFilterView(false)
+    dispatch(resetPokemons())
+    dispatch(loadPokemons(0))
+  }
+
+  const openDetailModal = (name: string) => {
+    setModalOpen(true)
+    dispatch(getSinglePokemon(name))
+  }
+
+  const closeDetailModal = () => {
+    setModalOpen(false)
+    dispatch(getSinglePokemon(''))
   }
 
   return (
@@ -69,13 +66,23 @@ export const Main = () => {
           }}
           onReset={onSearchReset}
         />
-        <Filter types={types} onChange={onTypeChange} currentType={currentType} />
+        <Filter />
       </Box>
-      {showedPokemons.length > 0 ? (
-        <MainView pokemons={showedPokemons} loadMore={loadMore} />
+      {pokemons.length > 0 ? (
+        <MainView
+          pokemons={pokemons}
+          loadMore={() => {
+            dispatch(nextOffset())
+          }}
+          isNextPage={isNextPage}
+          openModal={openDetailModal}
+        />
       ) : (
         <SorryMsg />
       )}
+      <Modal isOpen={isModalOpen} style={{ overlay: { zIndex: 100 } }}>
+        <PokemonModal pokemon={singlePokemon} onClose={closeDetailModal} />
+      </Modal>
     </>
   )
 }

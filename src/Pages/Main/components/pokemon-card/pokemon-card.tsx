@@ -1,18 +1,12 @@
-import { Avatar, Box, Card } from '@mui/material'
+import { Avatar, Box, Button, Card } from '@mui/material'
 import { Name } from './pokemon-card-styled'
 
 type Props = {
-  pokemon: {
-    readonly name: string
-    readonly imgUrl: string
-    readonly url: string
-    readonly stats: any
-    readonly moves: any
-  }
+  readonly name: string
+  readonly openModal: (name: string) => void
 }
 
-export const PokemonCard = ({ pokemon }: Props) => {
-  const { name, url, imgUrl, moves, stats } = pokemon
+export const PokemonCard = ({ name, openModal }: Props) => {
   return (
     <Card
       variant='outlined'
@@ -21,8 +15,15 @@ export const PokemonCard = ({ pokemon }: Props) => {
       }}
     >
       <Box display='flex' alignItems='center' justifyContent='space-between'>
-        <Avatar src={imgUrl} />
         <Name>{name}</Name>
+        <Button
+          variant={'outlined'}
+          onClick={() => {
+            openModal(name)
+          }}
+        >
+          View details
+        </Button>
       </Box>
     </Card>
   )
